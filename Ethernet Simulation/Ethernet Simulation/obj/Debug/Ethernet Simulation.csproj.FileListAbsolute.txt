@@ -1,0 +1,9 @@
+c:\users\kevin\documents\visual studio 2013\Projects\Ethernet Simulation\Ethernet Simulation\bin\Debug\Ethernet Simulation.exe.config
+c:\users\kevin\documents\visual studio 2013\Projects\Ethernet Simulation\Ethernet Simulation\bin\Debug\Ethernet Simulation.exe
+c:\users\kevin\documents\visual studio 2013\Projects\Ethernet Simulation\Ethernet Simulation\bin\Debug\Ethernet Simulation.pdb
+c:\users\kevin\documents\visual studio 2013\Projects\Ethernet Simulation\Ethernet Simulation\obj\Debug\Ethernet Simulation.csprojResolveAssemblyReference.cache
+c:\users\kevin\documents\visual studio 2013\Projects\Ethernet Simulation\Ethernet Simulation\obj\Debug\Ethernet_Simulation.Properties.Resources.resources
+c:\users\kevin\documents\visual studio 2013\Projects\Ethernet Simulation\Ethernet Simulation\obj\Debug\Ethernet Simulation.csproj.GenerateResource.Cache
+c:\users\kevin\documents\visual studio 2013\Projects\Ethernet Simulation\Ethernet Simulation\obj\Debug\Ethernet Simulation.exe
+c:\users\kevin\documents\visual studio 2013\Projects\Ethernet Simulation\Ethernet Simulation\obj\Debug\Ethernet Simulation.pdb
+c:\users\kevin\documents\visual studio 2013\Projects\Ethernet Simulation\Ethernet Simulation\obj\Debug\Ethernet_Simulation.mainForm.resources

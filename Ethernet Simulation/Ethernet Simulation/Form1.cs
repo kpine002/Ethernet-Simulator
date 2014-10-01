@@ -170,11 +170,13 @@ namespace Ethernet_Simulation
 
                         if(selected_computer == 0)
                         {
-                            random_computers[0] = next_time_slot(S);
+                            back_off_timer[random_computers[0]] = next_time_slot(S);
+                            outputBox.Text += "COMPUTER " + random_computers[0] + " BACKED OFF AND NOW HAS A WAIT TIME OF " + back_off_timer[random_computers[0]] + Environment.NewLine;
                         }
                         else
                         {
-                            random_computers[1] = next_time_slot(S);
+                            back_off_timer[random_computers[1]] = next_time_slot(S);
+                            outputBox.Text += "COMPUTER " + random_computers[0] + " BACKED OFF AND NOW HAS A WAIT TIME OF " + back_off_timer[random_computers[0]] + Environment.NewLine;
                         }
 
                     }
@@ -208,15 +210,27 @@ namespace Ethernet_Simulation
                         random_computers[ci] = next_computer;
                         outputBox.Text += next_computer + "   ";
                     }
+                    if(slotted_machine)
+                    {
+                        random_computers[xi] = slotted_machine_number;
+                    }
                     outputBox.Text += Environment.NewLine;
 
+                    int selected_computer = 0;
                     //Randomly select a computer from array of computers attempting to access channel
-                    int selected_computer = RANDOM_COMPUTER.Next(xi);
-                    if(ti < back_off_timer[selected_computer])
+                    if (slotted_machine)
+                    {
+                        selected_computer = RANDOM_COMPUTER.Next(xi+1);
+                    }
+                    else
+                    {
+                        selected_computer = RANDOM_COMPUTER.Next(xi);
+                    }
+                    /*if(ti < back_off_timer[selected_computer])
                     {
                         //If the selected computer has a wait time greater than the current time slot, select a new computer
                         selected_computer = RANDOM_COMPUTER.Next(xi);
-                    }
+                    }*/
 
                     outputBox.Text += "ACCESS GRANTED TO COMPUTER " + random_computers[selected_computer] + Environment.NewLine;
                     //Increase "total slots used" by 1
@@ -226,7 +240,7 @@ namespace Ethernet_Simulation
                     foreach (int comp in random_computers)
                     {
                         //Make sure to only update wait_time for computers that were selected AND did not access the channel
-                        if (comp != random_computers[selected_computer] && comp != 0)
+                        if (comp != random_computers[selected_computer] && comp > 0)
                         {
                             //Update wait_time for current computer
                             back_off_timer[comp] = next_time_slot(S);
@@ -237,14 +251,17 @@ namespace Ethernet_Simulation
                             }
                             //Report updated wait_time for computers
                             outputBox.Text += "COMPUTER " + comp + " BACKED OFF AND NOW HAS A WAIT TIME OF " + back_off_timer[comp] + Environment.NewLine;
+                            
                         }
                     }
+                    S *= 2;
 
                     //Reset the random_computers array
                     reset_random_computers(random_computers);                  
                 }
 
                 reduce_wait_timer(back_off_timer);
+                slotted_machine = false;
                 outputBox.Text += newsection;
                 //End of Loop
             }//End of Simulation
@@ -275,20 +292,20 @@ namespace Ethernet_Simulation
 
         private void reduce_wait_timer(int[] back_off_timer)
         {
-            foreach(int computer in back_off_timer)
+            for(int c = 1; c<back_off_timer.Length; c++)
             {
-                if(back_off_timer[computer] != -1)
+                if(back_off_timer[c] > -1)
                 {
-                    back_off_timer[computer]--;
+                    back_off_timer[c]--;
                 }
             }
         }
 
         private void reset_random_computers(int[] random_computers)
         {
-            foreach(int computer in random_computers)
+            for (int c = 0; c < random_computers.Length; c++)
             {
-                random_computers[computer] = 0;
+                random_computers[c] = 0;
             }
         }
 

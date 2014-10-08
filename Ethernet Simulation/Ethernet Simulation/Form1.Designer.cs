@@ -98,7 +98,7 @@
             this.xBox.Name = "xBox";
             this.xBox.Size = new System.Drawing.Size(100, 26);
             this.xBox.TabIndex = 9;
-            this.xBox.Text = "4";
+            this.xBox.Text = "3";
             // 
             // label6
             // 
@@ -117,7 +117,7 @@
             this.sBox.Name = "sBox";
             this.sBox.Size = new System.Drawing.Size(100, 26);
             this.sBox.TabIndex = 7;
-            this.sBox.Text = "1";
+            this.sBox.Text = "2";
             // 
             // label4
             // 
@@ -155,7 +155,7 @@
             this.tBox.Name = "tBox";
             this.tBox.Size = new System.Drawing.Size(100, 26);
             this.tBox.TabIndex = 3;
-            this.tBox.Text = "50";
+            this.tBox.Text = "10";
             // 
             // label3
             // 

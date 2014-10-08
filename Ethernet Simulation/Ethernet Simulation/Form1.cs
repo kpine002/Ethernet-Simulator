@@ -176,7 +176,7 @@ namespace Ethernet_Simulation
                         else
                         {
                             back_off_timer[random_computers[1]] = next_time_slot(S);
-                            outputBox.Text += "COMPUTER " + random_computers[0] + " BACKED OFF AND NOW HAS A WAIT TIME OF " + back_off_timer[random_computers[0]] + Environment.NewLine;
+                            outputBox.Text += "COMPUTER " + random_computers[0] + " BACKED OFF AND NOW HAS A WAIT TIME OF " + back_off_timer[random_computers[1]] + Environment.NewLine;
                         }
 
                     }
@@ -201,7 +201,7 @@ namespace Ethernet_Simulation
                         //Randomly select next computer number
                         int next_computer = get_next_computer(n);
                         //Make sure randomly selected computer is not already in random_computers arrray
-                        while (Array.IndexOf(random_computers, next_computer) > -1)
+                        while ((Array.IndexOf(random_computers, next_computer)>-1) && (back_off_timer[next_computer] < 1))
                         {
                             //Keep randomly choosing a computer number number until it is not in random_computers array
                             next_computer = get_next_computer(n);
@@ -254,11 +254,12 @@ namespace Ethernet_Simulation
                             
                         }
                     }
-                    S *= 2;
-
+                    outputBox.Text += S;
                     //Reset the random_computers array
-                    reset_random_computers(random_computers);                  
+                    reset_random_computers(random_computers);
+                    S = S * 2;
                 }
+                
 
                 reduce_wait_timer(back_off_timer);
                 slotted_machine = false;

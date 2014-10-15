@@ -13,7 +13,6 @@ namespace Ethernet_Simulation
     public partial class mainForm : Form
     {
         //Global Variables for simulator
-        //Boolean VALID_INPUTS = false;
         Boolean[] VALID_INPUTS = new Boolean[5];
         static Random RANDOM_X = new Random();
         static Random RANDOM_C = new Random();
@@ -22,6 +21,12 @@ namespace Ethernet_Simulation
         String output_string;
         int MAX_WAIT_TIME = 0;
         int TOTAL_SLOTS_USED = 0;
+        Boolean MED_DET = false;
+        Boolean HIGH_DET = false;
+        Boolean MAX_OUTPUT = false;
+        int MAX_OUTPUT_TIME = 100;
+        DateTime start;
+        DateTime finish; 
 
         public mainForm()
         {
@@ -88,8 +93,7 @@ namespace Ethernet_Simulation
             }
             catch (FormatException e)
             {
-                Console.WriteLine("Input string is not a sequence of digits.");
-                //return false;
+                Console.WriteLine(e);
             }
             //Input is not a number
             return false;
@@ -105,6 +109,7 @@ namespace Ethernet_Simulation
             int S = s;
             MAX_WAIT_TIME = 0; //Stores the maximum waiting time for a computer
             TOTAL_SLOTS_USED = 0; //Stores the number of time slots a computer accesses the channel
+            MAX_OUTPUT = false; //Reset MAX_OUTPUT Boolean
             int[] random_computers = new int[x+5]; //Int array that stores the computers that are randomly selected [Array is as big as X input]           
             int[] back_off_timer = new int[n+1]; //Int array that stores the wait time off all computers [Array is as big as N+1 input]
             for(int time=0; time < back_off_timer.Length ; time++) 
@@ -116,7 +121,8 @@ namespace Ethernet_Simulation
 
             //Outputs text about simulation
             string newsection = "========================================" + Environment.NewLine;
-            outputBox.Text = "NEW SIMULATION: " + DateTime.Now.ToString() + Environment.NewLine;
+            start = DateTime.Now;
+            outputBox.Text = "NEW SIMULATION: " + start.ToString() + Environment.NewLine;
             outputBox.Text += newsection;
             outputBox.Text += "The simulation will now run with the following inputs;" + Environment.NewLine;
             outputBox.Text += "N = " + n + "\tT = " + t + Environment.NewLine;
@@ -127,32 +133,38 @@ namespace Ethernet_Simulation
             //Time slot loop that runs from 0 to T
             for (int ti = 0; ti < t; ti++)
             {
-                output_string += "TIME SLOT #" + (ti+1);
+                //Update output flag if time slot equals or passes MAX_OUTPUT_TIME
+                if(ti >= MAX_OUTPUT_TIME)
+                {
+                    MAX_OUTPUT = true;
+                }
+
+                if(MED_DET && !MAX_OUTPUT) output_string += "TIME SLOT #" + (ti+1);
 
                 slotted_machine_number = Array.IndexOf(back_off_timer, 0);
                 if (slotted_machine_number > -1)
                 {
                     slotted_machine = true;
-                    output_string += "   (TIME SLOT ALSO ASSIGNED TO " + slotted_machine_number + ")"; 
+                    if (HIGH_DET && !MAX_OUTPUT) output_string += "   (TIME SLOT ALSO ASSIGNED TO " + slotted_machine_number + ")"; 
                 }
 
                 output_string += Environment.NewLine;
 
                 //Randomly select number of computers that will attempt to access channel [Random value from 0 to X]
-                int xi = RANDOM_X.Next(x);
+                int xi = RANDOM_X.Next(x+1);
 
                 //Randomly selected number of computers is 0
                 if(xi == 0)
                 {
                     if (slotted_machine)
                     {
-                        output_string += "ACCESS GRANTED TO COMPUTER " + slotted_machine_number + Environment.NewLine;
+                        if (MED_DET && !MAX_OUTPUT) output_string += "ACCESS GRANTED TO COMPUTER " + slotted_machine_number + Environment.NewLine;
                         //Increase "total slots used" by 1
                         TOTAL_SLOTS_USED++;
                     }
                     else
                     {
-                        output_string += "THERE ARE NO COMPUTERS ATTEMPTING TO ACCESS THE CHANNEL" + Environment.NewLine;
+                        if (MED_DET && !MAX_OUTPUT) output_string += "NO ACCESS TO THE CHANNEL" + Environment.NewLine;
                     }
                 }
 
@@ -164,26 +176,26 @@ namespace Ethernet_Simulation
 
                     if (slotted_machine)
                     {
-                        //outputBox.Text += "COMPUTER " + next_computer + " IS ALSO ATTEMPTING TO ACCESS THE CHANNEL" + Environment.NewLine;
                         random_computers[0] = next_computer;
                         random_computers[1] = slotted_machine_number;
                         int selected_computer = RANDOM_COMPUTER.Next(2);
-                        output_string += "ACCESS GRANTED TO COMPUTER " + next_computer + Environment.NewLine;
+                        if (MED_DET && !MAX_OUTPUT) output_string += "ACCESS GRANTED TO COMPUTER " + next_computer + Environment.NewLine;
                         TOTAL_SLOTS_USED++;
 
                         if(selected_computer == 0)
                         {
                             //Selected computer was random computer
                             back_off_timer[random_computers[0]] = next_time_slot(S);
-                            output_string += "   COMPUTER " + random_computers[0] + " BACKED OFF AND NOW HAS A WAIT TIME OF " + back_off_timer[random_computers[0]] + Environment.NewLine;
+                            if (HIGH_DET && !MAX_OUTPUT) output_string += "   COMPUTER " + random_computers[0] + " BACKED OFF AND NOW HAS A WAIT TIME OF " + back_off_timer[random_computers[0]] + Environment.NewLine;
                         }
                         else
                         {
                             //selected computer was slotted machine
                             back_off_timer[random_computers[1]] = next_time_slot(S);
-                            output_string += "   COMPUTER " + random_computers[1] + " BACKED OFF AND NOW HAS A WAIT TIME OF " + back_off_timer[random_computers[1]] + Environment.NewLine;
+                            if (HIGH_DET && !MAX_OUTPUT) output_string += "   COMPUTER " + random_computers[1] + " BACKED OFF AND NOW HAS A WAIT TIME OF " + back_off_timer[random_computers[1]] + Environment.NewLine;
                         }
-                        if (S < t)
+                        //Double S due to collision
+                        if (S*2 < t)
                         {
                             S = S * 2;
                         }
@@ -192,8 +204,7 @@ namespace Ethernet_Simulation
                     else
                     {
                         //Output message and computer that gained access to channel
-                        //outputBox.Text += "THERE IS 1 COMPUTER ATTEMPTING TO ACCESS THE CHANNEL" + Environment.NewLine;
-                        output_string += "ACCESS GRANTED TO COMPUTER " + next_computer + Environment.NewLine;
+                        if (MED_DET && !MAX_OUTPUT) output_string += "ACCESS GRANTED TO COMPUTER " + next_computer + Environment.NewLine;
                         //Increase "total slots used" by 1
                         TOTAL_SLOTS_USED++;
                     }
@@ -201,8 +212,8 @@ namespace Ethernet_Simulation
                 else
                 {
                     //Output message
-                    //outputBox.Text += "THERE ARE " + xi + " COMPUTERS ATTEMPTING TO ACCESS THE CHANNEL" + Environment.NewLine;
-                    //outputBox.Text += "THOSE COMPUTERS ARE: ";
+                    if (MED_DET && !MAX_OUTPUT) output_string += "   " + xi + " COMPUTERS ATTEMPTING TO ACCESS THE CHANNEL";
+                    if (HIGH_DET && !MAX_OUTPUT) output_string += " (";
 
                     //Loop to select random computers
                     for (int ci = 0; ci < xi; ci++)
@@ -217,13 +228,20 @@ namespace Ethernet_Simulation
                         }
                         //Add randomly selected computer to random_computers array
                         random_computers[ci] = next_computer;
-                        //outputBox.Text += next_computer + "   ";
+                        if (HIGH_DET && !MAX_OUTPUT && (xi-1 == ci))
+                        {
+                            output_string += next_computer + ")";
+                        }
+                        else if (HIGH_DET && !MAX_OUTPUT && (xi - 1 != ci))
+                        {
+                            output_string += next_computer + ", ";
+                        }
                     }
                     if(slotted_machine)
                     {
                         random_computers[xi] = slotted_machine_number;
                     }
-                    //outputBox.Text += Environment.NewLine;
+                    if (MED_DET && !MAX_OUTPUT) output_string += Environment.NewLine;
 
                     
                     //Randomly select a computer from array of computers attempting to access channel
@@ -237,7 +255,7 @@ namespace Ethernet_Simulation
                         selected_computer = RANDOM_COMPUTER.Next(xi);
                     }
 
-                    output_string += "ACCESS GRANTED TO COMPUTER " + random_computers[selected_computer] + Environment.NewLine;
+                    if (MED_DET && !MAX_OUTPUT) output_string += "ACCESS GRANTED TO COMPUTER " + random_computers[selected_computer] + Environment.NewLine;
 
                     //Increase "total slots used" by 1
                     TOTAL_SLOTS_USED++;
@@ -256,25 +274,21 @@ namespace Ethernet_Simulation
                                 MAX_WAIT_TIME = back_off_timer[comp];
                             }
                             //Report updated wait_time for computers
-                            output_string += "   COMPUTER " + comp + " BACKED OFF AND NOW HAS A WAIT TIME OF " + back_off_timer[comp] + Environment.NewLine;
+                            if (HIGH_DET && !MAX_OUTPUT) output_string += "   COMPUTER " + comp + " BACKED OFF AND NOW HAS A WAIT TIME OF " + back_off_timer[comp] + Environment.NewLine;
                             
                         }
                     }
-                    //outputBox.Text += S;
                     //Reset the random_computers array
                     reset_random_computers(random_computers);
                     //Double S due to collision. 
-                    if (S < t)
+                    if (S*2 < t)
                     {
                         S = S * 2;
                     }
                 }
 
-                //Limit output to the first 100 time slots.
-                if (t < 100)
-                {
-                    outputBox.Text += output_string + newsection;
-                }
+
+                if (MED_DET && (!MAX_OUTPUT)) outputBox.Text += output_string + newsection;
                 output_string = "";
                 reduce_wait_timer(back_off_timer);
                 slotted_machine = false;
@@ -282,9 +296,11 @@ namespace Ethernet_Simulation
             }//End of Simulation
 
             //Display the results of "total bytes sent" and "maximum node wait time"
-            outputBox.Text += "RESULTS" + Environment.NewLine + Environment.NewLine;
+            finish = DateTime.Now;
+            TimeSpan elapsed = finish.Subtract(start);
+            outputBox.Text += "SIMULATION COMPLETE: " + finish.ToString() + " (" + elapsed.TotalSeconds + " Second(s))"+ Environment.NewLine;
             int bytes = (k * TOTAL_SLOTS_USED);
-            outputBox.Text += "TOTAL BYTES SENT: " + bytes;
+            outputBox.Text += "Total Bytes Sent: " + bytes;
             //Converting to Kilobytes
             if(bytes > 1024)
             {
@@ -303,9 +319,9 @@ namespace Ethernet_Simulation
                 double giga = bytes / 1073741824.00;
                 outputBox.Text += " / " + giga.ToString("#.##") +" GB";
             }
-            outputBox.Text += " [" + k + " BYTES x " + TOTAL_SLOTS_USED + " SLOTS USED]" + Environment.NewLine;
+            outputBox.Text += " (" + TOTAL_SLOTS_USED + " slots used)" + Environment.NewLine;
 
-            outputBox.Text += "MAX WAITING TIME FOR NODE: " + MAX_WAIT_TIME + Environment.NewLine;
+            outputBox.Text += "Maximum Wait Time: " + MAX_WAIT_TIME + " time slot(s)" + Environment.NewLine;
         }
 
         //Reduces the amount of time slots that a computer should wait
@@ -347,7 +363,29 @@ namespace Ethernet_Simulation
         private void clearBtn_Click(object sender, EventArgs e)
         {
             outputBox.Text = "";
-            //TODO: Clear variable textboxes
+        }
+
+        //Supporting method to set detail level in outputbox. Called whenever detail level is changed.
+        private void Detail_Change(object sender, EventArgs e)
+        {
+            //Alot of detail
+            if (radioButton3.Checked)
+            {
+                HIGH_DET = true;
+                MED_DET = true;
+            }
+            //Some detail
+            else if (radioButton2.Checked)
+            {
+                HIGH_DET = false;
+                MED_DET = true;
+            }
+            //No detail
+            else
+            {
+                HIGH_DET = false;
+                MED_DET = false;
+            }
         }
     }
 }
